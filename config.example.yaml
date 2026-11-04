@@ -1,0 +1,13 @@
+config_path: /users/project_name/config/config_example.yaml
+Output_dir: /users/project_name/output
+SAHMI: /users/project_name/software/SAHMI
+fq_path: /users/project_name/dataset/cohort
+ncbi_blast: /users/project_name/envs/Scasa/bin
+Kraken2Uniq_path: /users/project_name/software/kraken2/kraken2
+kraken_database_path: /users/project_name/reference/kraken_database/database_ncbi_T2T
+umi: 10  #v2 10 v3 12
+cb: 16  #v2 16 v3 16
+R1: 1
+R2: 2
+sample: sample1, sample2 ,sample3, sample4
+kraken_library_path: /users/project_name/reference/kraken_database/database_ncbi_T2T_asshuman_score_6
