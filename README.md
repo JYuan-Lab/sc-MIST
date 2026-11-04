@@ -1,10 +1,8 @@
 # sc-MIST
 
-**sc-MIST** (**single-cell Microbial Identification with Stringent Testing**) is a workflow for recovering high-confidence microbial signals from host-dominated single-cell RNA-seq (scRNA-seq) data while minimizing spurious taxonomic assignments, host-derived cross-mapping, and experimental contamination.
+**sc-MIST** (**single-cell Microbial Identification with Stringent Testing**) is a workflow for recovering high-confidence microbial signals from host-dominated single-cell RNA-seq (scRNA-seq) data while reducing spurious taxonomic assignments and contamination.
 
-sc-MIST combines host-read depletion, curated microbial references, k-mer-based taxonomic classification, taxon-specific sequence validation, genome-distribution assessment, statistical denoising, contamination filtering, and barcode-aware microbial quantification.
-
-The workflow was developed for the study:
+sc-MIST was developed for the study:
 
 > **A Pan-Cancer Cell-Associated Microbiome Atlas Reveals Inter- and Intra-Tumor Heterogeneity**
 > *Under Review*
@@ -13,27 +11,9 @@ The workflow was developed for the study:
 
 ## Overview
 
-Microbial reads in human scRNA-seq datasets are typically extremely sparse relative to host-derived reads. Their detection is further complicated by several sources of false-positive signal, including:
+sc-MIST combines host-read depletion, microbial classification, sequence-level validation, statistical denoising, contamination filtering, and barcode-aware microbial quantification.
 
-* incomplete removal of human-derived reads;
-* sequence homology between human and microbial genomes;
-* repetitive or low-complexity sequences;
-* ambiguous taxonomic assignments;
-* localized cross-mapping to small genomic regions;
-* reagent and laboratory contamination;
-* environmental microbial background;
-* PCR amplification and duplicate reads.
-
-To address these challenges, sc-MIST applies multiple independent layers of evidence before a microbial taxon is retained.
-
-A central design principle is that a high-confidence microbial signal should be supported by:
-
-1. **sequence-level evidence** consistent with the assigned microbial taxon;
-2. **diverse k-mer support** rather than repeated evidence from only a few sequence fragments;
-3. **broad genomic support** rather than reads piling up in a highly localized region;
-4. **consistent signal across cell barcodes and samples**;
-5. **abundance exceeding expected contamination backgrounds**;
-6. **cell-associated evidence recoverable through valid scRNA-seq barcodes and UMIs**.
+To reduce false-positive assignments, the microbial reference is restricted to taxa with prior evidence of human association. The curated reference includes human-associated bacteria from MGnify, mBodyMap, the Human Microbiome Project, published literature, and NCBI-annotated human-infecting viruses.
 
 ---
 
@@ -43,53 +23,25 @@ A central design principle is that a high-confidence microbial signal should be 
 Raw scRNA-seq FASTQ
         |
         v
-1. Human read depletion
-   Cell Ranger / zUMI
-        |
-        v
-Human-unmapped reads
+1. Human-unmapped read extraction
         |
         v
 2. Initial microbial classification
-   Kraken2 / Kraken2Uniq
         |
         v
-Candidate read -> taxid assignments
-        |
-        v
-3. Sequence-level validation
-   Taxon-specific BWA-MEM alignment
-   - alignment length > 45 bp
-   - sequence identity > 95%
-        |
-        v
-Removal of residual human reads
-   - MHC/HLA
-   - human rRNA
+3. BWA validation and host-residual removal
         |
         v
 4. Kraken2 re-classification
         |
         v
-Clean taxonomic assignments
-        |
-        v
-5. False-positive denoising
-   - taxon-supporting k-mer fraction
-   - barcode-level k-mer correlation
-   - sample-level k-mer correlation
-   - microbial genome read-distribution assessment
+5. False-positive filtering
         |
         v
 6. Contamination filtering
-   - cell-line background filtering
-   - Decontam
-   - literature-derived contaminant blacklist
-   - MGnify environmental blacklist
         |
         v
-7. Cell-associated microbial quantification
-   Cell barcode + UMI
+7. Microbial quantification
         |
         v
 High-confidence Cell x Microbe matrix
@@ -97,30 +49,14 @@ High-confidence Cell x Microbe matrix
 
 ---
 
-# 1. Human read depletion
+# 1. Human-unmapped read extraction
 
-sc-MIST first removes reads that can be explained by the human reference genome.
+scRNA-seq reads are first aligned to the human reference genome.
 
-For 10x Genomics datasets, human alignment is performed using **Cell Ranger**. For compatible non-10x droplet-based datasets, barcode-aware preprocessing tools such as **zUMI** can be used.
+* **10x Genomics:** Cell Ranger
+* **non-10x droplet-based scRNA-seq:** zUMI
 
-Only reads remaining unmapped to the human reference are passed to downstream microbial analysis.
-
-For 10x scRNA-seq data:
-
-```text
-R1 = cell barcode + UMI
-R2 = cDNA sequence
-```
-
-Cell barcode and UMI information are preserved so that microbial reads can later be reassigned to individual cells.
-
-### Human reference
-
-In our implementation, the complete **T2T-CHM13v2.0** human reference genome was included to maximize removal of human-derived sequences.
-
-Reference:
-
-https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/analysis_set/chm13v2.0.fa.gz
+Only reads remaining unmapped to the human reference are retained.
 
 ### Input
 
@@ -137,120 +73,40 @@ sample.unmapped.R1.fastq.gz
 sample.unmapped.R2.fastq.gz
 ```
 
----
+For droplet-based datasets, cell barcode and UMI information are preserved.
 
-# 2. Curated microbial reference and initial classification
+### Human reference
 
-## Human-associated microbial reference
+In our implementation, the **T2T-CHM13v2.0** human reference genome was used.
 
-To reduce false-positive assignments from environmentally abundant or poorly supported taxa, sc-MIST restricts microbial detection to taxa with prior evidence of human association.
+Reference:
 
-The curated microbial reference incorporates human-associated microorganisms reported in resources including:
-
-* MGnify
-* mBodyMap
-* Human Microbiome Project
-* published literature
-
-Because several cancers have established viral etiologies, the reference also includes **NCBI-annotated human-infecting viruses**.
-
-This strategy reduces the search space while preserving microbial taxa with plausible relevance to human biology.
+[TO ADD: human reference URL / version details]
 
 ---
 
-# 3. Kraken2 database construction
+# 2. Initial microbial classification
 
-The sc-MIST Kraken2 database contains:
+Human-unmapped reads are classified using **Kraken2/Kraken2Uniq** against a custom microbial reference database.
 
-```text
-Human
-+
-Human-associated bacteria
-+
-Human-infecting viruses
-```
+Each read is assigned a putative taxonomic label using k-mer evidence and the lowest common ancestor framework.
 
-## Human reference
+### Custom reference
 
-The human component is based on:
+The database includes:
 
-```text
-T2T-CHM13v2.0
-```
+* human reference sequences;
+* human-associated bacterial taxa;
+* human-infecting viruses.
 
-## Viral reference
+Human-associated bacteria were curated from:
 
-Reference viral genomes were obtained from **NCBI Virus / RefSeq**.
+* MGnify;
+* mBodyMap;
+* Human Microbiome Project;
+* published literature.
 
-Reference used in our analysis:
-
-https://www.ncbi.nlm.nih.gov/labs/virus/vssi/#/virus?SeqType_s=Nucleotide&SourceDB_s=RefSeq
-
-Database snapshot used in our study:
-
-```text
-2024-04-24
-```
-
-## Bacterial reference
-
-Reference bacterial genomes can be downloaded using Kraken2:
-
-```bash
-kraken2-build --download-library bacteria --db /path/to/kraken_db
-```
-
-The downloaded bacterial collection can then be restricted to the curated human-associated taxa used by sc-MIST.
-
-## NCBI taxonomy
-
-Kraken2 database construction also requires the NCBI taxonomy database:
-
-https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
-
-Taxonomy snapshot used in our study:
-
-```text
-2024-05-27
-```
-
-## Build the Kraken2 database
-
-After preparing the human, bacterial, viral, and taxonomy components:
-
-```bash
-kraken2-build --build --db /path/to/kraken_db
-```
-
----
-
-# 4. Initial microbial classification
-
-Human-unmapped reads are classified using **Kraken2 / Kraken2Uniq**.
-
-In our workflow, sequencing reads are decomposed into k-mers, and taxonomic assignments are inferred from k-mer matches against the custom reference database.
-
-For Kraken2Uniq-based analyses:
-
-```text
-k = 35
-```
-
-Each read receives a putative taxonomic assignment using the lowest common ancestor framework.
-
-Conceptually:
-
-```text
-Read
-  |
-  +-- k-mer 1 -> taxid A
-  +-- k-mer 2 -> taxid A
-  +-- k-mer 3 -> taxid B
-  +-- ...
-  |
-  v
-LCA-based read assignment
-```
+Human-infecting viruses were obtained from NCBI Virus.
 
 ### Input
 
@@ -261,57 +117,61 @@ custom Kraken2 database
 
 ### Output
 
-Typical outputs include:
-
 ```text
 sample.kraken.output.txt
 sample.kraken.report.txt
 sample.kraken.report.mpa.txt
 ```
 
-The read-level output records:
+### Database details
 
 ```text
-read ID -> assigned taxid
+Kraken2 version: [TO ADD]
+Kraken2Uniq version: [TO ADD]
+k-mer length: 35
+NCBI taxonomy version/date: [TO ADD]
+viral database date: [TO ADD]
+bacterial reference source/version: [TO ADD]
 ```
-
-while the Kraken report summarizes microbial taxa detected at the sample level.
 
 ---
 
-# 5. Sequence-level validation with BWA-MEM
+# 3. BWA validation and host-residual removal
 
-Kraken-based taxonomic assignments are independently cross-checked using **BWA-MEM**.
+## 3.1 Taxon-specific BWA validation
 
-Reads assigned to microbial species or genera are aligned against the corresponding taxon-specific microbial reference genome or reference library.
+Reads assigned to microbial species or genera are aligned to the corresponding taxon-specific reference using **BWA-MEM**.
 
-A read is retained only when both criteria are satisfied:
+Reads are retained when:
 
 ```text
 alignment length > 45 bp
 sequence identity > 95%
 ```
 
-This additional alignment layer helps remove taxonomic assignments driven by short or weak sequence similarities.
+### Input
 
-### Example
+```text
+Kraken-positive microbial reads
+read-to-taxid assignments
+taxon-specific BWA reference library
+```
 
-| Read    | Kraken taxon | Alignment length | Identity | Retained |
-| ------- | ------------ | ---------------: | -------: | -------- |
-| Read001 | H. pylori    |            87 bp |    99.1% | Yes      |
-| Read002 | H. pylori    |            36 bp |    99.0% | No       |
-| Read003 | Pseudomonas  |            82 bp |    92.4% | No       |
+### Output
+
+```text
+sample.bwa_pass.R1.fastq.gz
+sample.bwa_pass.R2.fastq.gz
+```
 
 ---
 
-# 6. Removal of residual human MHC/HLA and rRNA reads
+## 3.2 Removal of MHC/HLA and human rRNA reads
 
-Standard host alignment may fail to eliminate all human-derived reads, particularly sequences from highly polymorphic or repetitive regions.
-
-Candidate microbial reads passing taxon-specific BWA validation are therefore aligned again against dedicated human references containing:
+BWA-validated reads are further aligned against dedicated human references containing:
 
 * MHC/HLA sequences;
-* human ribosomal RNA;
+* human rRNA;
 * mitochondrial rRNA where applicable.
 
 Reads aligning to these references are removed.
@@ -319,8 +179,8 @@ Reads aligning to these references are removed.
 ### Input
 
 ```text
-BWA-validated microbial candidate reads
-HLA/MHC reference
+BWA-validated candidate reads
+MHC/HLA reference
 human rRNA reference
 ```
 
@@ -331,15 +191,20 @@ sample.clean.R1.fastq.gz
 sample.clean.R2.fastq.gz
 ```
 
-These reads represent the sequence-level validated microbial candidate pool.
+Reference details:
+
+```text
+MHC/HLA reference: [TO ADD]
+human rRNA reference: [TO ADD]
+```
 
 ---
 
-# 7. Kraken2 re-classification
+# 4. Kraken2 re-classification
 
-Because BWA validation and host-residual filtering alter the read population, the retained reads are re-classified using Kraken2.
+After BWA validation and host-residual removal, the retained reads are re-classified using Kraken2.
 
-This step regenerates the read-level and sample-level taxonomic information required for downstream statistical denoising.
+This step regenerates taxonomic assignments for the cleaned read pool and provides the required input for downstream denoising.
 
 ### Input
 
@@ -357,94 +222,47 @@ sample.clean.kraken.report.txt
 sample.clean.kraken.report.mpa.txt
 ```
 
-All downstream k-mer, read-count, and microbial-abundance calculations are based on this cleaned read population.
+---
+
+# 5. False-positive filtering
+
+sc-MIST applies multiple denoising criteria to retain taxa with internally consistent sequence support.
+
+## 5.1 Read-level k-mer support
+
+A read is retained when:
+
+```text
+>= 50% of informative k-mers directly support the assigned taxon
+```
 
 ---
 
-# 8. Read-level k-mer support
+## 5.2 Barcode-level correlation
 
-For each classified read, sc-MIST evaluates the fraction of informative k-mers that directly support the assigned microbial taxon.
+For droplet-based datasets, total k-mers and unique k-mers are summarized across cell barcodes for each taxon.
 
-Reads are retained when:
-
-```text
-taxon-supporting k-mer fraction >= 0.50
-```
-
-For example:
-
-```text
-18 taxon-supporting k-mers
--------------------------- = 0.90 -> retain
-20 informative k-mers
-```
-
-whereas:
-
-```text
-7
--- = 0.35 -> remove
-20
-```
-
-This criterion reduces assignments in which the final read-level taxonomic label is supported by only a minority of the underlying sequence evidence.
-
----
-
-# 9. Barcode-level k-mer correlation
-
-For droplet-based scRNA-seq datasets, sc-MIST evaluates microbial sequence support across cell barcodes.
-
-For each taxon within each sample, the following quantities are calculated for each barcode:
+A Spearman correlation is calculated between:
 
 ```text
 total k-mers
+vs
 unique k-mers
 ```
-
-A Spearman correlation is then calculated between total and unique k-mer counts across barcodes.
 
 Taxa are retained when:
 
 ```text
-Spearman r > 0.1
+r > 0.1
 ```
 
-### Rationale
-
-A genuine microbial signal should generally show increasing sequence diversity as the amount of microbial sequence evidence increases.
-
-For example:
-
-```text
-Barcode   Total k-mers   Unique k-mers
-BC01      10             3
-BC02      30             8
-BC03      60             17
-BC04      120            31
-```
-
-is consistent with a diverse microbial signal.
-
-In contrast:
-
-```text
-Barcode   Total k-mers   Unique k-mers
-BC01      20             2
-BC02      80             3
-BC03      150            2
-BC04      300            3
-```
-
-suggests that increasing apparent abundance is driven primarily by repeated observations of a small number of sequence fragments.
+This step is not applied to non-droplet data.
 
 ---
 
-# 10. Sample-level k-mer correlation
+## 5.3 Sample-level correlation
 
-Within each cohort, sc-MIST evaluates the consistency of microbial evidence across samples.
-
-This analysis is performed when:
+Within each cohort, sample-level correlation is performed when:
 
 ```text
 number of samples > 2
@@ -473,140 +291,92 @@ Taxa are retained when:
 
 ```text
 r1 > 0.1
-AND
 r2 > 0.1
-AND
 r3 > 0.1
 ```
 
-These three quantities capture complementary properties of microbial evidence:
+---
+
+## 5.4 Genome-distribution assessment
+
+Candidate microbial reads are evaluated for their distribution across the assigned microbial genome.
+
+Broadly distributed reads are considered more consistent with a true microbial signal, whereas highly localized read pile-ups may indicate spurious cross-mapping.
+
+Filtering rule:
 
 ```text
-Reads
-= number of sequencing reads assigned to the taxon
-
-Total minimizers / k-mers
-= total sequence-level taxonomic evidence
-
-Unique minimizers / unique k-mers
-= diversity of sequence evidence
+[TO ADD: exact genome-distribution metric and threshold]
 ```
-
-A high-confidence microbial taxon is expected to show concordant variation among all three measurements across samples.
 
 ---
 
-# 11. Microbial genome read-distribution assessment
+# 6. Contamination filtering
 
-sc-MIST additionally evaluates how microbial reads are distributed across the assigned microbial genome.
+## 6.1 Cell-line background filtering
 
-A plausible microbial signal should generally be supported by reads distributed across multiple genomic regions.
-
-By contrast, reads piling up within a very narrow genomic interval can indicate:
-
-* conserved sequence homology;
-* host-microbial cross-mapping;
-* repetitive sequence artifacts;
-* reference-specific alignment artifacts.
-
-Conceptually:
-
-```text
-High-confidence pattern
-
-Genome
-|------------------------------------------------|
-     ^       ^           ^      ^           ^
-     reads distributed across multiple regions
-```
-
-versus:
-
-```text
-Potentially spurious pattern
-
-Genome
-|------------------------------------------------|
-                    ^^^^^^^
-                    localized pile-up
-```
-
-Localized read distributions can therefore be flagged or removed as potential false-positive assignments.
-
----
-
-# 12. Contamination filtering
-
-Sequence-valid microbial assignments may still represent laboratory, reagent, or environmental contamination.
-
-sc-MIST therefore applies additional contamination-control procedures.
-
----
-
-## 12.1 Cell-line background filtering
-
-For each microbial taxon, abundance is normalized as RPMM:
+For each taxon, microbial abundance is normalized as RPMM:
 
 ```text
 RPMM =
-taxon reads
---------------------- x 1,000,000
-total microbial reads
+taxon reads / total microbial reads x 1,000,000
 ```
 
-The abundance observed in each biological sample is compared with the corresponding taxon-specific abundance distribution in cell-line reference datasets.
+Sample RPMM is compared with the corresponding taxon-specific background distribution from cell-line datasets.
 
-In the current workflow, the 90th percentile can be used as the background threshold:
+Current threshold:
 
 ```text
-sample RPMM > cell-line q0.90 RPMM
+sample RPMM > cell-line 90th percentile RPMM
 ```
 
-Taxa failing to exceed the cell-line background are removed.
-
----
-
-## 12.2 Decontam
-
-The R package **decontam** is used as an additional contamination-detection layer.
-
-The frequency-based method identifies potential contaminants based on their relationship with sample nucleic-acid concentration.
-
-Contaminants often show increased relative abundance in samples with lower total nucleic-acid concentration.
-
-The resulting contamination status can be incorporated into the final microbial filtering procedure.
-
----
-
-## 12.3 Literature-derived contaminant blacklist
-
-Taxa previously reported as common laboratory or reagent contaminants are additionally flagged using a curated literature-derived blacklist.
-
-This provides an independent safeguard against known low-biomass sequencing contaminants.
-
----
-
-## 12.4 MGnify environmental blacklist
-
-sc-MIST also incorporates an environmental-background filter derived from MGnify.
-
-Microorganisms repeatedly reported across multiple environment-associated studies can be considered high-risk environmental background taxa.
-
-In our implementation, taxa reported in:
+Reference dataset:
 
 ```text
-> 4 independent environment-associated studies
+[TO ADD: CCLE/cell-line dataset description and source]
 ```
-
-can be flagged for exclusion.
 
 ---
 
-# 13. Cell-associated microbial quantification
+## 6.2 Decontam
 
-After false-positive and contamination filtering, retained microbial reads are linked back to individual cells using their original scRNA-seq cell barcodes.
+The R package **decontam** is used with the frequency-based method to identify potential contaminants.
 
-For UMI-based droplet scRNA-seq, reads are grouped by:
+Parameters:
+
+```text
+method: frequency
+threshold: [TO ADD]
+concentration variable: [TO ADD]
+```
+
+---
+
+## 6.3 Contaminant blacklists
+
+Additional filtering is performed using:
+
+1. a literature-curated laboratory contaminant blacklist;
+2. an MGnify-derived environmental blacklist.
+
+For the MGnify blacklist, taxa reported in more than four environment-associated studies can be flagged.
+
+Blacklist resources:
+
+```text
+laboratory contaminant reference: [TO ADD]
+MGnify filtering procedure: [TO ADD]
+```
+
+---
+
+# 7. Microbial quantification
+
+After all filtering steps, retained microbial reads are linked back to individual cells using their original cell barcodes.
+
+For UMI-based scRNA-seq, microbial abundance is quantified using unique UMIs.
+
+Reads are grouped by:
 
 ```text
 cell barcode
@@ -616,30 +386,14 @@ microbial taxon
 UMI
 ```
 
-Reads sharing the same barcode, microbial taxon, and UMI are counted once to reduce PCR amplification bias.
+PCR duplicates sharing the same barcode, taxon, and UMI are counted once.
 
-### Example
+### Output
 
-```text
-Read001   BC01   UMI_A   H. pylori
-Read002   BC01   UMI_A   H. pylori
-Read003   BC01   UMI_B   H. pylori
-```
-
-Although three sequencing reads are present, the microbial abundance for this cell is:
+The primary output is a:
 
 ```text
-BC01 H. pylori = 2 unique UMIs
-```
-
----
-
-# 14. Final output
-
-The primary sc-MIST output is a:
-
-```text
-Cell x Microbe matrix
+Cell x Microbe UMI matrix
 ```
 
 Example:
@@ -649,54 +403,12 @@ Example:
 | BC01         |        2 |   0 |     0 |
 | BC02         |        0 |   1 |     0 |
 | BC03         |        4 |   0 |     2 |
-| BC04         |        0 |   0 |     0 |
 
-This matrix can be integrated directly with the corresponding host scRNA-seq expression matrix.
-
-For example:
-
-```text
-Cell barcode
-     |
-     +---- host gene-expression profile
-     |
-     +---- cell type annotation
-     |
-     +---- microbial UMI counts
-```
-
-This enables analyses of:
-
-* microbial prevalence across cell types;
-* tumor-specific and cell-type-specific microbial patterns;
-* microbial-positive versus microbial-negative host transcriptional states;
-* inter-tumor microbial heterogeneity;
-* intra-tumor microbial heterogeneity;
-* host transcriptional responses associated with cell-associated microbial signals.
+This matrix can be integrated with the corresponding scRNA-seq gene-expression matrix and cell-type annotations.
 
 ---
 
-# 15. Interpretation
-
-A microbial signal passing sc-MIST should be interpreted as:
-
-> a high-confidence cell-associated microbial sequencing signal supported by taxonomically consistent sequence evidence and passing the implemented false-positive and contamination filters.
-
-Detection of microbial RNA within a cell barcode does **not**, by itself, prove intracellular infection.
-
-Possible biological origins include:
-
-* intracellular microorganisms;
-* cell-surface-associated microorganisms;
-* phagocytosed microbial material;
-* extracellular microbial RNA associated with a captured cell;
-* droplet co-encapsulation.
-
-Biological interpretation should therefore consider tumor context, cell identity, microbial biology, and orthogonal validation where available.
-
----
-
-# 16. Input data
+# Input
 
 For 10x Genomics scRNA-seq:
 
@@ -712,11 +424,11 @@ R1 = cell barcode + UMI
 R2 = transcript sequence
 ```
 
-For other droplet-based platforms, the appropriate cell-barcode and UMI structure must be specified.
+For other droplet-based platforms, the appropriate barcode and UMI structure must be specified.
 
 ---
 
-# 17. Recommended repository structure
+# Repository structure
 
 ```text
 scMIST/
@@ -729,7 +441,6 @@ scMIST/
 │   └── config.example.yaml
 │
 ├── workflow/
-│   ├── rules/
 │   └── scripts/
 │
 ├── envs/
@@ -740,18 +451,13 @@ scMIST/
 │   ├── mgnify_environment_blacklist.tsv
 │   └── human_associated_taxa.tsv
 │
-├── example/
-│   ├── config.yaml
-│   └── toy_data/
-│
-└── docs/
+└── example/
+    └── toy_data/
 ```
 
 ---
 
-# 18. Configuration
-
-Machine-specific paths should be specified through a YAML configuration file rather than hard-coded in the workflow.
+# Configuration
 
 Example:
 
@@ -765,38 +471,41 @@ fastq_dir: "/path/to/fastq"
 
 output_dir: "results"
 
-human_reference: "/path/to/T2T_CHM13_reference"
+human_reference: "/path/to/human_reference"
 
-kraken_database: "/path/to/scMIST_kraken_database"
+kraken_database: "/path/to/kraken_database"
 
-bwa_library: "/path/to/taxon_specific_bwa_library"
+bwa_library: "/path/to/bwa_library"
 
 hla_reference: "/path/to/hla_reference.fa"
 
 human_rrna_reference: "/path/to/human_rrna.fa"
 
 cell_barcode_length: 16
-
 umi_length: 12
 
 bwa_min_alignment_length: 45
-
 bwa_min_identity: 0.95
 
 min_taxon_kmer_fraction: 0.50
 
 barcode_correlation_threshold: 0.10
-
 sample_correlation_threshold: 0.10
 
 cell_line_quantile: 0.90
 ```
 
+Additional configuration:
+
+```text
+[TO ADD: project-specific parameters]
+```
+
 ---
 
-# 19. Software requirements
+# Requirements
 
-Core software used by sc-MIST includes:
+Core software:
 
 ```text
 Snakemake
@@ -810,7 +519,7 @@ seqkit
 R
 ```
 
-Relevant R packages include:
+R packages:
 
 ```text
 data.table
@@ -821,11 +530,15 @@ ShortRead
 decontam
 ```
 
-Software versions used for the published analysis should be recorded in the environment configuration.
+Exact versions:
+
+```text
+[TO ADD: software version table]
+```
 
 ---
 
-# 20. Installation
+# Running sc-MIST
 
 Clone the repository:
 
@@ -834,20 +547,7 @@ git clone https://github.com/<USERNAME>/scMIST.git
 cd scMIST
 ```
 
-Create the Conda environment:
-
-```bash
-conda env create -f envs/environment.yaml
-conda activate scmist
-```
-
-Software requiring separate installation, including Cell Ranger, should be installed according to the corresponding provider instructions.
-
----
-
-# 21. Running sc-MIST
-
-Example:
+Run:
 
 ```bash
 snakemake \
@@ -856,110 +556,46 @@ snakemake \
     --cores 16
 ```
 
-For cluster or HPC execution, an appropriate Snakemake execution profile can be supplied.
-
----
-
-# 22. Example output structure
+HPC/cluster example:
 
 ```text
-results/
-├── 01_human_unmapped/
-├── 02_kraken_initial/
-├── 03_bwa_validation/
-├── 04_host_residual_filter/
-├── 05_kraken_reclassification/
-├── 06_false_positive_filter/
-├── 07_contamination_filter/
-└── 08_microbe_quantification/
-```
-
-The final microbial abundance output can be stored as:
-
-```text
-sample.microbial_UMI_matrix.tsv
-```
-
-Additional taxon-level quality-control tables are strongly recommended so that the filtering history of every detected microorganism remains traceable.
-
----
-
-# 23. Methodological summary
-
-In brief, sc-MIST identifies microbial signals using a sequence of increasingly stringent filters:
-
-```text
-Human-unmapped
-      |
-      v
-Kraken-positive
-      |
-      v
-Taxon-specific BWA-supported
-      |
-      v
-MHC/rRNA-negative
-      |
-      v
-Kraken re-confirmed
-      |
-      v
->=50% taxon-supporting k-mers
-      |
-      v
-Barcode correlation r > 0.1
-      |
-      v
-Sample correlations
-r1 > 0.1
-r2 > 0.1
-r3 > 0.1
-      |
-      v
-Genome-distribution support
-      |
-      v
-Cell-line / Decontam / blacklist filtering
-      |
-      v
-High-confidence cell-associated microorganism
+[TO ADD: cluster execution example]
 ```
 
 ---
 
-# 24. Citation
+# Citation
 
 sc-MIST was developed for:
 
 **A Pan-Cancer Cell-Associated Microbiome Atlas Reveals Inter- and Intra-Tumor Heterogeneity**
 *Under Review*
 
-A formal citation will be added upon publication.
+Formal citation details will be added upon publication.
 
-If you use sc-MIST before publication, please cite this GitHub repository and acknowledge the manuscript above.
-
----
-
-# 25. Acknowledgements
-
-sc-MIST incorporates concepts from prior work on k-mer-based microbial denoising in single-cell sequencing, including the SAHMI framework. We thank the developers of SAHMI and the broader open-source microbial genomics community for providing useful methodological foundations and software resources.
+```text
+[TO ADD: authors]
+[TO ADD: journal / preprint DOI when available]
+```
 
 ---
 
-# 26. License
+# Acknowledgements
+
+sc-MIST builds on ideas from prior work in single-cell microbial signal detection and k-mer-based denoising. We thank the developers of SAHMI and the broader open-source microbial genomics community for providing useful methodological foundations and software resources.
+
+---
+
+# License
 
 This project is distributed under the **MIT License**.
 
-See:
-
-```text
-LICENSE
-```
-
-for details.
-
 ---
 
-# 27. Contact
+# Contact
 
 For questions, bug reports, or feature requests, please open an issue in this GitHub repository.
+
+```text
+[TO ADD: contact email if desired]
+```
