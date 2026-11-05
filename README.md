@@ -235,17 +235,8 @@ sample.clean.R2.fastq.gz
 
 sc-MIST applies multiple denoising criteria to retain taxa with internally consistent sequence support.
 
-## 5.1 Read-level k-mer support
 
-A read is retained when:
-
-```text
->= 50% of informative k-mers directly support the assigned taxon
-```
-
----
-
-## 4.2 Barcode-level correlation
+## 4.1 Barcode-level correlation
 
 For droplet-based datasets, total k-mers and unique k-mers are summarized across cell barcodes for each taxon.
 
@@ -260,36 +251,34 @@ unique k-mers
 Taxa are retained when:
 
 ```text
-r > 0.1
+r > 0
 ```
-
-This step is not applied to non-droplet data.
 
 ---
 
-## 4.3 Sample-level correlation
+## 4.2 Sample-level correlation
 
 Within each cohort, sample-level correlation is performed when:
 
 ```text
-number of samples > 2
+number of samples >= 2
 ```
 
 For each taxon, three Spearman correlations are calculated:
 
 ```text
 r1:
-unique minimizers
+unique k-mers
 vs
-total minimizers
+total k-mers
 
 r2:
 total reads
 vs
-total minimizers
+total k-mers
 
 r3:
-unique minimizers
+unique k-mers
 vs
 total reads
 ```
@@ -306,7 +295,7 @@ r3 > 0
 
 
 
-# 5. Contamination filtering
+# 5. Decontamination
 
 ## 5.1 Cell-line background filtering
 
@@ -322,7 +311,7 @@ Sample RPMM is compared with the corresponding taxon-specific background distrib
 Current threshold:
 
 ```text
-sample RPMM > cell-line 90th percentile RPMM
+Taxid RPMM > cell-line 90th percentile RPMM
 ```
 
 
@@ -435,9 +424,7 @@ conda activate sc-MIST
 
 snakemake -s sc-MIST_pipeline.smk \
     --cores 8 \
-    --configfile config.example.yaml \
-    --rerun-triggers mtime \
-    --rerun-incomplete
+    --configfile config.example.yaml
 
 echo 'finish'
 ```
