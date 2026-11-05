@@ -51,7 +51,7 @@ High-confidence Cell x Microbe matrix
 ---
 
 
-Reference resources
+## Reference resources
 
 sc-MIST requires the following reference resources. Large reference databases are not included in this repository; users should download or build them from the sources below.
 
@@ -154,32 +154,17 @@ refdata-gex-GRCh38-2020-A
 
 # 2. Initial microbial classification
 
-Human-unmapped reads are classified using **Kraken2/Kraken2Uniq** against a custom microbial reference database.
+Human-unmapped reads are classified using **Kraken2/Kraken2Uniq** against the custom sc-MIST reference database described in [Reference resources](#reference-resources).
 
-Each read is assigned a putative taxonomic label using k-mer evidence and the lowest common ancestor framework.
+Kraken2 assigns candidate taxonomic labels based on k-mer matches and the lowest common ancestor (LCA) framework.
 
-### Custom reference
-
-The database includes:
-
-* human reference sequences;
-* human-associated bacterial taxa;
-* human-infecting viruses.
-
-Human-associated bacteria were curated from:
-
-* MGnify;
-* mBodyMap;
-* Human Microbiome Project;
-* published literature.
-
-Human-infecting viruses were obtained from NCBI Virus.
+The custom database contains human reference sequences, curated human-associated bacterial taxa, and human-infecting viral sequences.
 
 ### Input
 
 ```text
 human-unmapped FASTQ
-custom Kraken2 database
+custom sc-MIST Kraken2 database
 ```
 
 ### Output
@@ -189,6 +174,8 @@ sample.kraken.output.txt
 sample.kraken.report.txt
 sample.kraken.report.mpa.txt
 ```
+
+The Kraken output provides read-level taxonomic assignments and taxon-level summaries that are used for downstream sequence validation.
 
 ---
 
