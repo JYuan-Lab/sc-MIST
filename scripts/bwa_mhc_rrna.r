@@ -20,14 +20,14 @@ opt = parse_args(OptionParser(option_list = option_list))
 Sys.setenv(PATH = paste(opt$condaenv, Sys.getenv("PATH"), sep=":"))
 
 bwa_sam=paste0(opt$work_path,'/',opt$out_file, '/',opt$sample,'_mhc.sam')
-str1=paste0('/hdd/yanhuan/envs/tum/bin/bwa mem -t 4 ',opt$reference_fa,' ',opt$fq2,'> ', bwa_sam)
+str1=paste0('/users/project_name/envs/sc-MIST/bin/bwa mem -t 4 ',opt$reference_fa,' ',opt$fq2,'> ', bwa_sam)
 system(str1)
 bwa_bam=paste0(opt$work_path,'/',opt$out_file, '/',opt$sample,'_mhc.bam')
-str3=paste0('/hdd/yanhuan/envs/tum/bin/samtools collate ',bwa_sam, '  -o ', bwa_bam )
+str3=paste0('/users/project_name/envs/sc-MIST/bin/samtools collate ',bwa_sam, '  -o ', bwa_bam )
 system(str3)
 
 bwa_unmappe_bam=paste0(opt$work_path,'/',opt$out_file, '/',opt$sample,'_unmapped_mhc_read_id')
-str4=paste0('/hdd/yanhuan/envs/tum/bin/samtools view -f 4 ',bwa_bam,' | cut -f1 | sort -u > ',bwa_unmappe_bam )
+str4=paste0('/users/project_name/envs/sc-MIST/bin/samtools view -f 4 ',bwa_bam,' | cut -f1 | sort -u > ',bwa_unmappe_bam )
 system(str4)
 
 get_fq_1=paste0( 'seqkit grep -j 10 -f ',bwa_unmappe_bam,' ', opt$fq1,' > ', opt$sfq1)
