@@ -442,16 +442,15 @@ scMIST/
 ├── environment.yaml
 │
 ├── scripts/
-│   └── xxx
-│   └── xxx
-│   └── xxx
-│   └── xxx
-│   └── xxx
+│   └── barcode_denoising_v5.r
+│   └── bwa_filter_v2.sh
+│   └── bwa_mhc_rrna.r
+│   └── ...
 │
 └── resources/
-    ├── lab_contaminant_blacklist.tsv
-    ├── mgnify_environment_blacklist.tsv
-    └── human_associated_taxa.tsv
+    ├── black_list.txt
+    ├── kraken_overlap_databases.xlsx
+    └── magnify_black.txt
 
 
 ```
