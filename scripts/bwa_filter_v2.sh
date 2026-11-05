@@ -1,4 +1,4 @@
-/hdd/yanhuan/envs/tum/bin/samtools view -F 0x900 "$1" \
+/users/project_name/envs/sc-MIST/bin/samtools view -F 0x900 "$1" \
 | awk '
 {
   cigar=$6;
