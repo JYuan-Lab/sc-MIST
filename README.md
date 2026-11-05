@@ -48,17 +48,73 @@ Raw scRNA-seq FASTQ
         v
 High-confidence Cell x Microbe matrix
 ```
+---
+
+
+Reference resources
+
+sc-MIST requires the following reference resources. Large reference databases are not included in this repository; users should download or build them from the sources below.
+
+1. Human reference for host alignment
+
+For 10x Genomics scRNA-seq data, host alignment was performed using the Cell Ranger GRCh38-2020-A reference (GENCODE v32 / Ensembl 98).
+
+
+2. Custom Kraken2 database
+
+The sc-MIST Kraken2 database consists of:
+
+Human: T2T-CHM13v2.0
+Bacteria: Kraken2 bacterial reference genomes, restricted to taxa with prior evidence of human association
+Viruses: human-infecting viral genomes from NCBI Virus / RefSeq
+Taxonomy: NCBI taxonomy
+
+The bacterial reference was curated by comparing Kraken2 bacterial taxa with human-associated microbial resources including HMP, MGnify, mBodyMap, and published literature (PMID: 32467386).
+
+Matches were scored by taxonomic level:
+
+species = 3
+genus   = 2
+phylum  = 1
+
+Species with a cumulative score >= 6 were retained, resulting in 3,808 bacterial species in the curated reference.
+
+The custom database can then be constructed using standard Kraken2 database-building procedures.
+
+3. Taxon-specific BWA reference library
+
+A separate BWA reference library is used to validate Kraken2 assignments.
+
+Species-level assignment: reference sequences from the corresponding species are indexed directly.
+Genus-level assignment: sequences from retained species belonging to the same genus are combined and indexed together.
+
+Bacterial and viral taxa included in the sc-MIST microbial reference should have corresponding BWA indices.
+
+4. HLA reference
+
+Residual reads derived from highly polymorphic HLA/MHC regions are filtered using genomic HLA sequences from the IPD-IMGT/HLA Database.
+
+5. Human rRNA reference
+
+Residual human ribosomal RNA reads are filtered using an NCBI-derived reference containing:
+
+18S rRNA
+28S rRNA
+mitochondrial rRNA
+
 
 ---
 
 # 1. Human-unmapped read extraction
 
-scRNA-seq reads are first aligned to the human reference genome.
+scRNA-seq reads are first aligned to the human reference genome to remove host-derived reads.
 
 * **10x Genomics:** Cell Ranger
 * **non-10x droplet-based scRNA-seq:** zUMI
 
-Only reads remaining unmapped to the human reference are retained.
+> **Note:** For 10x Genomics datasets, we recommend running Cell Ranger before starting the downstream sc-MIST workflow. By default, the provided Snakemake workflow assumes that Cell Ranger processing has already been completed and therefore does not run Cell Ranger automatically.
+
+Only reads that remain unmapped to the human reference are retained for downstream microbial analysis.
 
 ### Input
 
@@ -68,6 +124,12 @@ sample_R2.fastq.gz
 human reference genome
 ```
 
+For 10x Genomics data, the downstream workflow can also start from a Cell Ranger output BAM file:
+
+```text
+possorted_genome_bam.bam
+```
+
 ### Output
 
 ```text
@@ -75,15 +137,16 @@ sample.unmapped.R1.fastq.gz
 sample.unmapped.R2.fastq.gz
 ```
 
-For droplet-based datasets, cell barcode and UMI information are preserved.
+For droplet-based datasets, cell barcode and UMI information are preserved so that microbial reads can later be reassigned to individual cells.
 
 ### Human reference
 
-In our implementation, the **T2T-CHM13v2.0** human reference genome was used.
+For 10x Genomics data, our implementation used the Cell Ranger GRCh38 reference:
 
-Reference:
+```text
+refdata-gex-GRCh38-2020-A
+```
 
-[TO ADD: human reference URL / version details]
 
 ---
 
@@ -123,17 +186,6 @@ custom Kraken2 database
 sample.kraken.output.txt
 sample.kraken.report.txt
 sample.kraken.report.mpa.txt
-```
-
-### Database details
-
-```text
-Kraken2 version: [TO ADD]
-Kraken2Uniq version: [TO ADD]
-k-mer length: 35
-NCBI taxonomy version/date: [TO ADD]
-viral database date: [TO ADD]
-bacterial reference source/version: [TO ADD]
 ```
 
 ---
@@ -193,12 +245,6 @@ sample.clean.R1.fastq.gz
 sample.clean.R2.fastq.gz
 ```
 
-Reference details:
-
-```text
-MHC/HLA reference: [TO ADD]
-human rRNA reference: [TO ADD]
-```
 
 ---
 
@@ -292,26 +338,14 @@ total reads
 Taxa are retained when:
 
 ```text
-r1 > 0.1
-r2 > 0.1
-r3 > 0.1
+r1 > 0
+r2 > 0
+r3 > 0
 ```
 
 ---
 
-## 5.4 Genome-distribution assessment
 
-Candidate microbial reads are evaluated for their distribution across the assigned microbial genome.
-
-Broadly distributed reads are considered more consistent with a true microbial signal, whereas highly localized read pile-ups may indicate spurious cross-mapping.
-
-Filtering rule:
-
-```text
-[TO ADD: exact genome-distribution metric and threshold]
-```
-
----
 
 # 6. Contamination filtering
 
@@ -332,11 +366,6 @@ Current threshold:
 sample RPMM > cell-line 90th percentile RPMM
 ```
 
-Reference dataset:
-
-```text
-[TO ADD: CCLE/cell-line dataset description and source]
-```
 
 ---
 
@@ -363,12 +392,6 @@ Additional filtering is performed using:
 
 For the MGnify blacklist, taxa reported in more than four environment-associated studies can be flagged.
 
-Blacklist resources:
-
-```text
-laboratory contaminant reference: [TO ADD]
-MGnify filtering procedure: [TO ADD]
-```
 
 ---
 
@@ -408,25 +431,6 @@ Example:
 
 This matrix can be integrated with the corresponding scRNA-seq gene-expression matrix and cell-type annotations.
 
----
-
-# Input
-
-For 10x Genomics scRNA-seq:
-
-```text
-sample_R1.fastq.gz
-sample_R2.fastq.gz
-```
-
-Typical structure:
-
-```text
-R1 = cell barcode + UMI
-R2 = transcript sequence
-```
-
-For other droplet-based platforms, the appropriate barcode and UMI structure must be specified.
 
 ---
 
@@ -464,17 +468,16 @@ Example:
 ```yaml
 config_path: /users/project_name/config/config_example.yaml
 Output_dir: /users/project_name/output
-SAHMI: /users/project_name/software/SAHMI
+scMIST: /users/project_name/software/scMIST
 fq_path: /users/project_name/dataset/cohort
 ncbi_blast: /users/project_name/software/ncbi-blast/bin
 Kraken2Uniq_path: /users/project_name/software/kraken2/kraken2
-kraken_database_path: /users/project_name/reference/kraken_database/database_ncbi_T2T
+kraken_library_path: /users/project_name/reference/kraken_database/database_ncbi_T2T_asshuman_score_6
 umi: 10  #v2 10 v3 12
 cb: 16  #v2 16 v3 16
 R1: 1
 R2: 2
 sample: sample1, sample2 ,sample3, sample4
-kraken_library_path: /users/project_name/reference/kraken_database/database_ncbi_T2T_asshuman_score_6
 ```
 
 
