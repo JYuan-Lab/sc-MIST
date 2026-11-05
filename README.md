@@ -486,12 +486,14 @@ Run:
 
 ```bash
 conda env create -f environment.yml -n sc-MIST
+conda activate sc-MIST
 
-snakemake -s sc-MIST_pipeline.smk
---cores 8
---configfile config.example.yaml
---rerun-triggers mtime
---rerun-incomplete 
+snakemake -s sc-MIST_pipeline.smk \
+    --cores 8 \
+    --configfile config.example.yaml \
+    --rerun-triggers mtime \
+    --rerun-incomplete
+
 echo 'finish'
 ```
 
