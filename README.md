@@ -435,14 +435,16 @@ scMIST/
 ├── README.md
 ├── LICENSE
 ├── .gitignore
-├── Snakefile
+├── scMIST_pipeline.smk
 ├── config.example.yaml
+├── environment.yaml
 │
-├── workflow/
-│   └── scripts/
-│
-├── envs/
-│   └── environment.yaml
+├── scripts/
+│   └── xxx
+│   └── xxx
+│   └── xxx
+│   └── xxx
+│   └── xxx
 │
 └── resources/
     ├── lab_contaminant_blacklist.tsv
