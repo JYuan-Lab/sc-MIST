@@ -1,5 +1,4 @@
 
-
 # sc-MIST
 
 **sc-MIST** (**single-cell Microbial Identification with Stringent Testing**) is a workflow for recovering high-confidence microbial signals from host-dominated single-cell RNA-seq (scRNA-seq) data while reducing spurious taxonomic assignments and contamination.
