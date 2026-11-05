@@ -1,5 +1,4 @@
-# 筛选出通过gnues bwa但species 没有通过的reads对应的spcies
-# 例如 species 29382没有通过bwa，但其genus 1279通过了，但结果中不应出现29382这类结果
+
 
 library(tidyr)
 library(dplyr)
@@ -64,11 +63,11 @@ each_taxid_bwa<- function( ta){
     
     # bwa
     bwa_sam=paste0(opt$work_path,'/',opt$out_file, '/',sample,'_',ta, '.sam')
-    str1=paste0('/hdd/yanhuan/envs/tum/bin/bwa mem -t 4 ',paste0(opt$reference_fa,'/',ta,'.fa'),' ',' ',fa2fq_2,'> ', bwa_sam)
+    str1=paste0('/users/project_name/envs/sc-MIST/bin/bwa mem -t 4 ',paste0(opt$reference_fa,'/',ta,'.fa'),' ',' ',fa2fq_2,'> ', bwa_sam)
     system(str1)
 #
     bwa_bam=paste0(opt$work_path,'/',opt$out_file, '/',sample,'_',ta, '.bam')
-    str3=paste0('/hdd/yanhuan/envs/tum/bin/samtools collate ',bwa_sam, '  -o ', bwa_bam )
+    str3=paste0('/users/project_name/envs/sc-MIST/bin/samtools collate ',bwa_sam, '  -o ', bwa_bam )
     system(str3)
 
     # get reads id 
