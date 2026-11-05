@@ -1,6 +1,6 @@
 config_path: /users/project_name/config/config_example.yaml
 Output_dir: /users/project_name/output
-SAHMI: /users/project_name/software/SAHMI
+scMIST: /users/project_name/software/scMIST
 fq_path: /users/project_name/dataset/cohort
 ncbi_blast: /users/project_name/software/ncbi-blast/bin
 Kraken2Uniq_path: /users/project_name/software/kraken2/kraken2
