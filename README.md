@@ -436,9 +436,7 @@ scMIST/
 ├── LICENSE
 ├── .gitignore
 ├── Snakefile
-│
-├── config/
-│   └── config.example.yaml
+├── config.example.yaml
 │
 ├── workflow/
 │   └── scripts/
@@ -446,13 +444,12 @@ scMIST/
 ├── envs/
 │   └── environment.yaml
 │
-├── resources/
-│   ├── lab_contaminant_blacklist.tsv
-│   ├── mgnify_environment_blacklist.tsv
-│   └── human_associated_taxa.tsv
-│
-└── example/
-    └── toy_data/
+└── resources/
+    ├── lab_contaminant_blacklist.tsv
+    ├── mgnify_environment_blacklist.tsv
+    └── human_associated_taxa.tsv
+
+
 ```
 
 ---
@@ -462,105 +459,38 @@ scMIST/
 Example:
 
 ```yaml
-samples:
-  - S01
-  - S02
-  - S03
-
-fastq_dir: "/path/to/fastq"
-
-output_dir: "results"
-
-human_reference: "/path/to/human_reference"
-
-kraken_database: "/path/to/kraken_database"
-
-bwa_library: "/path/to/bwa_library"
-
-hla_reference: "/path/to/hla_reference.fa"
-
-human_rrna_reference: "/path/to/human_rrna.fa"
-
-cell_barcode_length: 16
-umi_length: 12
-
-bwa_min_alignment_length: 45
-bwa_min_identity: 0.95
-
-min_taxon_kmer_fraction: 0.50
-
-barcode_correlation_threshold: 0.10
-sample_correlation_threshold: 0.10
-
-cell_line_quantile: 0.90
+config_path: /users/project_name/config/config_example.yaml
+Output_dir: /users/project_name/output
+SAHMI: /users/project_name/software/SAHMI
+fq_path: /users/project_name/dataset/cohort
+ncbi_blast: /users/project_name/envs/Scasa/bin
+Kraken2Uniq_path: /users/project_name/software/kraken2/kraken2
+kraken_database_path: /users/project_name/reference/kraken_database/database_ncbi_T2T
+umi: 10  #v2 10 v3 12
+cb: 16  #v2 16 v3 16
+R1: 1
+R2: 2
+sample: sample1, sample2 ,sample3, sample4
+kraken_library_path: /users/project_name/reference/kraken_database/database_ncbi_T2T_asshuman_score_6
 ```
 
-Additional configuration:
-
-```text
-[TO ADD: project-specific parameters]
-```
-
----
-
-# Requirements
-
-Core software:
-
-```text
-Snakemake
-Cell Ranger
-zUMI
-Kraken2
-Kraken2Uniq
-BWA-MEM
-samtools
-seqkit
-R
-```
-
-R packages:
-
-```text
-data.table
-tidyverse
-dplyr
-optparse
-ShortRead
-decontam
-```
-
-Exact versions:
-
-```text
-[TO ADD: software version table]
-```
 
 ---
 
 # Running sc-MIST
 
-Clone the repository:
-
-```bash
-git clone https://github.com/<USERNAME>/scMIST.git
-cd scMIST
-```
 
 Run:
 
 ```bash
-snakemake \
-    --snakefile Snakefile \
-    --configfile config/config.yaml \
-    --cores 16
+snakemake -s scMIST_pipeline.smk
+--cores 8
+--configfile config.example.yaml
+--rerun-triggers mtime
+--rerun-incomplete 
+echo 'finish'
 ```
 
-HPC/cluster example:
-
-```text
-[TO ADD: cluster execution example]
-```
 
 ---
 
@@ -570,13 +500,6 @@ sc-MIST was developed for:
 
 **A Pan-Cancer Cell-Associated Microbiome Atlas Reveals Inter- and Intra-Tumor Heterogeneity**
 *Under Review*
-
-Formal citation details will be added upon publication.
-
-```text
-[TO ADD: authors]
-[TO ADD: journal / preprint DOI when available]
-```
 
 ---
 
@@ -594,8 +517,6 @@ This project is distributed under the **MIT License**.
 
 # Contact
 
-For questions, bug reports, or feature requests, please open an issue in this GitHub repository.
-
 ```text
-[TO ADD: contact email if desired]
+[Correspondence Email：yuan_jiao@gzlab.ac.cn]
 ```
