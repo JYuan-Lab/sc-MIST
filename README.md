@@ -485,7 +485,9 @@ kraken_library_path: /users/project_name/reference/kraken_database/database_ncbi
 Run:
 
 ```bash
-snakemake -s scMIST_pipeline.smk
+conda env create -f environment.yml -n sc-MIST
+
+snakemake -s sc-MIST_pipeline.smk
 --cores 8
 --configfile config.example.yaml
 --rerun-triggers mtime
@@ -515,10 +517,10 @@ sc-MIST builds on ideas from prior work in single-cell microbial signal detectio
 
 This project is distributed under the **MIT License**.
 
----
+
 
 # Contact
 
-```text
-[Correspondence Email：yuan_jiao@gzlab.ac.cn]
-```
+Correspondence Email：yuan_jiao@gzlab.ac.cn
+
+---
