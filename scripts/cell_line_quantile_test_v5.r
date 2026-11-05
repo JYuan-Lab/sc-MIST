@@ -5,28 +5,14 @@ library(tidyverse)
 library(readr)
 
 
-#cell.lines = read.delim('/hdd/yanhuan/micro/software/SAHMI/cell.lines.txt', header = T,sep=' ') %>% tibble() 
-#cell.lines=cell.lines %>% 
-#    filter (reads>0 & uniq >0)
-#qtile = 0.90
-#q_df = cell.lines %>%
-#group_by(name,rank)%>%
-#summarize(CLrpmm = 10^quantile(log10(rpmm),qtile, na.rm = T),
-#.groups = 'keep')
 
-
-#q_df=read.delim('/hdd/yanhuan/micro/software/SAHMI/cell_line_quantile.txt', header = T,sep='\t') %>% tibble()
-#q_df=q_df[,c('taxid','rank','threshold_0.90_exclude0')]
-#colnames(q_df)=c('taxid','rank','CLrpmm')  
-
-q_df=read.delim('/hdd/yanhuan/micro/software/SAHMI/CCLE_quantile_mhc_rrna.txt', header = T,sep='\t') 
+q_df=read.delim('/users/project_name/software/SAHMI/CCLE_quantile_mhc_rrna.txt', header = T,sep='\t') 
 #q_df %>% subset( taxid == 10407)
 #t(q_df %>% subset( taxid %in% c(210,10407)) )
 q_df=q_df[,c('taxid','rank','threshold_0.9_exclude0')]
 colnames(q_df)=c('taxid','rank','CLrpmm') 
 q_df$CLrpmm=ifelse(q_df$taxid == 10407,10.507194,q_df$CLrpmm) # hbv 保留为 threshold_0.95_add0
-#q_df$taxid=as.character(q_df$taxid)
-#rownames(q_df)=q_df$taxid
+
 
 kr=read.csv(argv[2],header=T,sep='\t') 
 kr=kr %>% subset(rank %in% c('G','S'))
