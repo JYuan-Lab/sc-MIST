@@ -34,19 +34,14 @@ Raw scRNA-seq FASTQ
 3. BWA validation and host-residual removal
         |
         v
-4. Kraken2 re-classification
+4. False-positive filtering
         |
         v
-5. False-positive filtering
+5. Contamination filtering
         |
         v
-6. Contamination filtering
-        |
-        v
-7. Microbial quantification
-        |
-        v
-High-confidence Cell x Microbe matrix
+6. Microbial quantification
+
 ```
 ---
 
@@ -234,34 +229,9 @@ sample.clean.R1.fastq.gz
 sample.clean.R2.fastq.gz
 ```
 
-
 ---
 
-# 4. Kraken2 re-classification
-
-After BWA validation and host-residual removal, the retained reads are re-classified using Kraken2.
-
-This step regenerates taxonomic assignments for the cleaned read pool and provides the required input for downstream denoising.
-
-### Input
-
-```text
-sample.clean.R1.fastq.gz
-sample.clean.R2.fastq.gz
-custom Kraken2 database
-```
-
-### Output
-
-```text
-sample.clean.kraken.output.txt
-sample.clean.kraken.report.txt
-sample.clean.kraken.report.mpa.txt
-```
-
----
-
-# 5. False-positive filtering
+# 4. False-positive filtering
 
 sc-MIST applies multiple denoising criteria to retain taxa with internally consistent sequence support.
 
@@ -275,7 +245,7 @@ A read is retained when:
 
 ---
 
-## 5.2 Barcode-level correlation
+## 4.2 Barcode-level correlation
 
 For droplet-based datasets, total k-mers and unique k-mers are summarized across cell barcodes for each taxon.
 
@@ -297,7 +267,7 @@ This step is not applied to non-droplet data.
 
 ---
 
-## 5.3 Sample-level correlation
+## 4.3 Sample-level correlation
 
 Within each cohort, sample-level correlation is performed when:
 
@@ -336,9 +306,9 @@ r3 > 0
 
 
 
-# 6. Contamination filtering
+# 5. Contamination filtering
 
-## 6.1 Cell-line background filtering
+## 5.1 Cell-line background filtering
 
 For each taxon, microbial abundance is normalized as RPMM:
 
@@ -358,7 +328,7 @@ sample RPMM > cell-line 90th percentile RPMM
 
 ---
 
-## 6.2 Decontam
+## 5.2 Decontam
 
 The R package **decontam** is used with the frequency-based method to identify potential contaminants.
 
@@ -372,7 +342,7 @@ concentration variable: [TO ADD]
 
 ---
 
-## 6.3 Contaminant blacklists
+## 5.3 Contaminant blacklists
 
 Additional filtering is performed using:
 
@@ -385,7 +355,7 @@ For the MGnify blacklist, taxa reported in more than four environment-associated
 
 ---
 
-# 7. Microbial quantification
+# 6. Microbial quantification
 
 After all filtering steps, retained microbial reads are linked back to individual cells using their original cell barcodes.
 
@@ -402,25 +372,6 @@ UMI
 ```
 
 PCR duplicates sharing the same barcode, taxon, and UMI are counted once.
-
-### Output
-
-The primary output is a:
-
-```text
-Cell x Microbe UMI matrix
-```
-
-Example:
-
-| Cell barcode | H_pylori | EBV | HPV16 |
-| ------------ | -------: | --: | ----: |
-| BC01         |        2 |   0 |     0 |
-| BC02         |        0 |   1 |     0 |
-| BC03         |        4 |   0 |     2 |
-
-This matrix can be integrated with the corresponding scRNA-seq gene-expression matrix and cell-type annotations.
-
 
 ---
 
