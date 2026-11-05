@@ -71,6 +71,8 @@ Taxonomy: NCBI taxonomy
 
 The bacterial reference was curated by comparing Kraken2 bacterial taxa with human-associated microbial resources including HMP, MGnify, mBodyMap, and published literature (PMID: 32467386).
 
+The overlap and scoring results used for bacterial reference curation are provided in [`resources/kraken_overlap_databases.xlsx`](resources/kraken_overlap_databases.xlsx).
+
 Matches were scored by taxonomic level:
 
 species = 3
@@ -387,11 +389,12 @@ concentration variable: [TO ADD]
 
 Additional filtering is performed using:
 
-1. a literature-curated laboratory contaminant blacklist;
+1. a literature-curated laboratory contaminant blacklist：
+   ([`resources/black_list.txt`](resources/black_list.txt));
 2. an MGnify-derived environmental blacklist.
+   ([`resources/mgnify_black.txt`](resources/mgnify_black.txt)).
 
 For the MGnify blacklist, taxa reported in more than four environment-associated studies can be flagged.
-
 
 ---
 
@@ -437,7 +440,7 @@ This matrix can be integrated with the corresponding scRNA-seq gene-expression m
 # Repository structure
 
 ```text
-scMIST/
+sc-MIST/
 ├── README.md
 ├── LICENSE
 ├── .gitignore
@@ -454,7 +457,7 @@ scMIST/
 └── resources/
     ├── black_list.txt
     ├── kraken_overlap_databases.xlsx
-    └── magnify_black.txt
+    └── mgnify_black.txt
 
 
 ```
@@ -489,7 +492,7 @@ sample: sample1, sample2 ,sample3, sample4
 Run:
 
 ```bash
-conda env create -f environment.yml -n sc-MIST
+conda env create -f environment.yaml -n sc-MIST
 conda activate sc-MIST
 
 snakemake -s sc-MIST_pipeline.smk \
