@@ -1,4 +1,4 @@
-![sc-MIST workflow](assets/scMIST_workflow.png)
+![sc-MIST workflow](assets/sc-MIST_pipeline.png)
 
 # sc-MIST
 
