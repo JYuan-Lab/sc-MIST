@@ -1,21 +1,16 @@
 # sc-MIST
 
 **sc-MIST** (**single-cell Microbial Identification with Stringent Testing**)
-is a reproducible pipeline for identifying high-confidence microbial reads in
-host-dominated 10x single-cell RNA-seq data. It starts from the Cell Ranger
-`outs/` directory, removes host-derived reads, validates microbial assignments
-against taxon-specific references, and applies barcode-, sample-, contamination-,
-and cell-line-aware filters before producing cell-level and sample-level
-microbial UMI tables.
+is a reproducible pipeline for identifying high-confidence microbial reads in host-dominated single-cell RNA-seq data.
+
+The workflow combines a curated human-associated microbial reference, Kraken2 classification cross-checked by BWA-MEM alignment, genome-wide read-distribution filters, and literature-based contaminant curation to suppress false positives, then links each microbial detection to host-cell identity and transcriptional state via cell barcodes.
 
 The workflow was developed for the study:
 
 > **A Pan-Cancer Cell-Associated Microbiome Atlas Reveals Inter- and Intra-Tumor
 > Heterogeneity** (under review)
 
-The repository includes a synthetic 3-sample demo. The demo runs the entire
-workflow from a Cell Ranger-style BAM to the final matrices without downloading
-the large production references.
+This repository provides a synthetic 3-sample demo dataset​ for a quick start.
 
 ---
 
@@ -78,10 +73,6 @@ Cell Ranger outs/possorted_genome_bam.bam
 ```
 
 ![sc-MIST workflow](assets/sc-MIST_pipeline.png)
-
-There are **11 numbered steps**. Step 05 contains both the host-residual filter
-and the assignment refresh; they are kept together because the refresh must run
-on exactly the reads that survived the host filter.
 
 ---
 
@@ -194,17 +185,6 @@ Ranger `bamtofastq` executable on `PATH`, or set `BAMTOFASTQ` in
 `environment.yaml` uses version bounds so that it also solves on macOS arm64.
 Pin exact versions on Linux if you need a byte-for-byte reproduction.
 
-The pipeline scripts themselves do **not** load Seurat. If you analyze the
-output matrices downstream, use **Seurat v4.4.0**, not Seurat v5:
-
-```r
-if (!requireNamespace("remotes", quietly = TRUE)) {
-  install.packages("remotes", repos = "https://cloud.r-project.org")
-}
-remotes::install_version("Seurat", version = "4.4.0",
-                         repos = "https://cloud.r-project.org")
-```
-
 ---
 
 ## Input data
@@ -237,9 +217,6 @@ Common 10x settings:
 
 The demo uses 16 + 10. Change `BC_LEN` and `UMI_LEN` in `config/config.sh` if
 your chemistry differs.
-
-This release supports the 10x droplet workflow. Bulk RNA-seq and non-10x
-platforms are intentionally out of scope.
 
 ### Sample table and sample count
 
@@ -1287,21 +1264,6 @@ only; use the official 10x tool for real Cell Ranger BAMs.
 Step 07 needs at least 3 samples. The runner prints a warning but continues;
 do not use a 1–2 sample project for the strict filter.
 
-**`decontam` is not installed**
-
-```r
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
-  install.packages("BiocManager", repos = "https://cloud.r-project.org")
-}
-BiocManager::install("decontam")
-```
-
-Do not use `--skip-decontam` for a final analysis.
-
-**Seurat v5 errors**
-
-The pipeline scripts do not load Seurat. If you use Seurat downstream, install
-and use **v4.4.0** as shown in [Requirements](#requirements).
 
 **No taxa survive step 10**
 
