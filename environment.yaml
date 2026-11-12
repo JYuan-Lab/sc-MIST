@@ -1,0 +1,29 @@
+name: scmist
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - kraken2>=2.1.3
+  - bwa>=0.7.17
+  - samtools>=1.16
+  - seqkit>=2.6
+  - seqtk>=1.4
+  - taxonkit>=0.16
+  - r-base>=4.3,<4.5
+  - r-optparse
+  - r-dplyr
+  - r-tidyr
+  - r-stringr
+  - r-data.table
+  - r-readr
+  - r-matrix
+  - bioconductor-decontam
+# Cell Ranger / 10x bamtofastq are not distributed through conda.
+# Install Cell Ranger separately and put its bamtofastq executable on PATH.
+# The manuscript analysis used kraken2 2.1.3, bwa 0.7.18, samtools 1.21,
+# seqkit 2.6.1, taxonkit 0.16.0, and R 4.4. Version bounds are used here so
+# the same file also solves on macOS arm64; pin exact versions on Linux if you
+# need a byte-for-byte reproduction of the original environment.
+# Seurat is intentionally not installed: downstream analysis must use
+# Seurat v4.4.0, installed explicitly as described in README.md.
