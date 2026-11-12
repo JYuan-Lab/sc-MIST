@@ -362,7 +362,7 @@ bash scripts/utils/check_references.sh --config config/config.sh
 | Taxonkit-style lineage matrix | No | 04, 11 | TSV with seven required columns |
 | Cell-line RPMM 90th percentile | Yes: `resources/CCLE_quantile_mhc_rrna.txt` | 08 | `taxid` plus `threshold_0.9_exclude0` |
 | Lab/MGnify/CCLE blacklists | Yes | 10 | three small text files |
-| NCBI Virus host metadata | No (too large) | 11 | download from NCBI Virus; ~1.3 GB |
+| NCBI Virus host metadata | No | 11 | download from NCBI Virus; ~1.3 GB |
 | HVD and HVIDB evidence | Yes | 11 | bundled as CSV/TXT |
 
 ### 1. Kraken2 database
@@ -462,8 +462,6 @@ Rules:
 - **Species taxid:** use the species genome/sequence FASTA.
 - **Genus taxid:** concatenate the FASTAs of all retained species in that
   genus, then index the combined FASTA.
-- Create a reference for every bacterial species, bacterial genus, viral
-  species, and viral genus that step 04 may receive.
 - Run `bwa index` on every FASTA.
 
 Prepare one FASTA per species in a directory, named `<taxid>.fa`,
@@ -477,9 +475,7 @@ bash scripts/utils/build_bwa_library.sh \
 ```
 
 The helper copies each species FASTA to `<taxid>.fa`, indexes it, and creates
-genus-level FASTA files by concatenating species with the same `g_taxid`. Check
-the warnings for missing species FASTA files.
-
+genus-level FASTA files by concatenating species with the same `g_taxid`.
 Set:
 
 ```bash
@@ -513,9 +509,6 @@ Set:
 HOST_RESIDUAL_FASTA=/path/to/reference/host_residual.fa
 ```
 
-Step 05 checks for `${HOST_RESIDUAL_FASTA}.bwt` and stops with a clear error if
-the BWA index is missing.
-
 ### 4. Taxonkit lineage matrix
 
 Steps 04 and 11 use a TSV with exactly these columns:
@@ -524,7 +517,6 @@ Steps 04 and 11 use a TSV with exactly these columns:
 taxid	kindom	phylum	genus	species	g_taxid	s_taxid
 ```
 
-`kindom` is intentionally spelled this way to match the released matrix.
 `g_taxid` is the genus taxid and `s_taxid` is the species taxid. Use `NA` when
 a rank is absent. Rows for both species and genus taxids are allowed.
 
@@ -573,8 +565,7 @@ nonzero RPMM values in cell-line controls. The table is bundled as:
 resources/CCLE_quantile_mhc_rrna.txt
 ```
 
-It has `taxid` and `threshold_0.9_exclude0` columns, and the script also
-accepts a table with `taxid` and `q90`. The pipeline uses
+It has `taxid` and `threshold_0.9_exclude0` columns, and the pipeline uses
 `threshold_0.9_exclude0`.
 
 The table was derived from the public cell-line microbiome data used by
@@ -627,9 +618,6 @@ must contain these columns (case-sensitive):
 Organism_Name  Species  Genus  Host
 ```
 
-`VIRUS_NCBI_ASSEMBLY_HOST` is optional and can point to a second NCBI export
-with the same columns. If you do not provide it, leave it empty.
-
 The two smaller resources are bundled:
 
 ```text
@@ -651,7 +639,7 @@ VIRUS_HVIDB="$PROJECT_ROOT/resources/HVIDB_PPIs.txt"
 VIRUS_MIN_SCORE=2
 ```
 
-The corresponding decision code, equivalent to the code used in the analysis,
+The corresponding decision code in the analysis,
 is:
 
 ```r
@@ -669,23 +657,13 @@ keep_taxid <- c(result_9_bac$taxid, result_9_virus_1$taxid)
 result_9_keep <- result_9 %>% subset(taxid %in% keep_taxid)
 ```
 
-`score > 1` is equivalent to `score >= 2`. The seven NCBI names excluded in
-the released analysis are handled in `scripts/11_summarize.R`:
-
-```r
-c("Casadabanvirus D3112", "Hepatitis E virus",
-  "Kayfunavirus LM33P1", "Metaavulavirus yucaipaense",
-  "Orthonairovirus khani", "Webervirus KLPPOU149",
-  "Melbournevirus")
-```
 
 For non-bacterial and non-viral kingdoms, the default is to drop them. Set
 `KEEP_OTHER_KINGDOMS=1` only if your analysis explicitly needs fungi or other
 kingdoms.
 
 To bypass the viral host-evidence filter for debugging, run
-`11_summarize.R --no-virus-filter`. Do not use that option for the final
-analysis without reporting it.
+`11_summarize.R --no-virus-filter`.
 
 ### 7. Blacklists
 
@@ -699,9 +677,6 @@ Three bundled files are used in step 10:
   https://www.ebi.ac.uk/metagenomics/).
 - `resources/ccle_blacklist_taxids.txt`: taxids excluded after the cell-line
   RPMM screen against the public cell-line microbiome data used by De et al.
-
-Keep the headers unchanged. If you update these lists, record the source and
-date in your analysis notebook.
 
 ---
 
@@ -1036,10 +1011,6 @@ pass this filter.
 results/09_decontam/decontam.tsv
 ```
 
-For a quick mechanics test without the `decontam` package, add
-`--skip-decontam`; this writes `NA` p-values and is **not** appropriate for a
-final analysis.
-
 ### Step 10 — final filters and UMI quantification
 
 **Input:** step 05 microbial FASTA, step 08 hits, step 09 decontam table, step
@@ -1078,10 +1049,6 @@ results/10_quantify/sample1/
 ├── sample1.taxon_abundance.tsv
 └── sample1.qc.tsv
 ```
-
-`sample1.taxon_metrics.tsv` is the first file to inspect if a taxon
-unexpectedly disappears: it records every filter value and the final `pass`
-flag.
 
 ### Step 11 — summarize, retain bacteria, and filter viruses
 
