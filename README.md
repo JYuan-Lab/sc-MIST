@@ -12,6 +12,7 @@ The workflow was developed for the study:
 
 This repository provides a synthetic 3-sample demo dataset​ for a quick start.
 
+![sc-MIST workflow](assets/sc-MIST_pipeline.png)
 ---
 
 ## Contents
@@ -69,8 +70,6 @@ Cell Ranger outs/possorted_genome_bam.bam
         ▼
 11  Bacterial retention + viral host-evidence filter + final matrices
 ```
-
-![sc-MIST workflow](assets/sc-MIST_pipeline.png)
 
 ---
 
