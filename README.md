@@ -35,7 +35,7 @@ This repository provides a synthetic 3-sample demo dataset​ for a quick start.
 ## Workflow
 
 ```text
-Cell Ranger outs/possorted_genome_bam.bam
+Single-cell RNA-seq data
         │
         ▼
 01  Extract human-unmapped reads (keep barcode + UMI)
