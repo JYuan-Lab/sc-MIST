@@ -1,0 +1,97 @@
+sample	barcode	taxid	counts	rank	genus	species
+sample1	CCCGGGTTTAAAACCC	1000	6	g	ToygenusA	
+sample1	CTAGCTAGCTAGCTAG	1000	6	g	ToygenusA	
+sample1	TGCATGCATGCATGCA	1000	6	g	ToygenusA	
+sample1	TTTAAAACCCGGGTTT	1000	6	g	ToygenusA	
+sample1	AAACCCGGGTTTAAAA	1000	4	g	ToygenusA	
+sample1	ACGTACGTACGTACGT	1000	4	g	ToygenusA	
+sample1	GATTACAGATTACAGA	1000	4	g	ToygenusA	
+sample1	GGGTTTAAAACCCGGG	1000	4	g	ToygenusA	
+sample1	CCCGGGTTTAAAACCC	1002	4	s	ToygenusA	ToyspeciesA2
+sample1	TGCATGCATGCATGCA	1002	4	s	ToygenusA	ToyspeciesA2
+sample1	AAACCCGGGTTTAAAA	1002	3	s	ToygenusA	ToyspeciesA2
+sample1	ACGTACGTACGTACGT	1002	3	s	ToygenusA	ToyspeciesA2
+sample1	CTAGCTAGCTAGCTAG	1002	2	s	ToygenusA	ToyspeciesA2
+sample1	TTTAAAACCCGGGTTT	1002	2	s	ToygenusA	ToyspeciesA2
+sample1	GATTACAGATTACAGA	1002	1	s	ToygenusA	ToyspeciesA2
+sample1	GGGTTTAAAACCCGGG	1002	1	s	ToygenusA	ToyspeciesA2
+sample1	AAACCCGGGTTTAAAA	2001	4	s	ToygenusB	ToyspeciesB
+sample1	ACGTACGTACGTACGT	2001	4	s	ToygenusB	ToyspeciesB
+sample1	CTAGCTAGCTAGCTAG	2001	3	s	ToygenusB	ToyspeciesB
+sample1	TTTAAAACCCGGGTTT	2001	3	s	ToygenusB	ToyspeciesB
+sample1	GATTACAGATTACAGA	2001	2	s	ToygenusB	ToyspeciesB
+sample1	GGGTTTAAAACCCGGG	2001	2	s	ToygenusB	ToyspeciesB
+sample1	CCCGGGTTTAAAACCC	2001	1	s	ToygenusB	ToyspeciesB
+sample1	TGCATGCATGCATGCA	2001	1	s	ToygenusB	ToyspeciesB
+sample1	CTAGCTAGCTAGCTAG	3001	4	s	Toyvirusgenus	Toyvirus
+sample1	TTTAAAACCCGGGTTT	3001	4	s	Toyvirusgenus	Toyvirus
+sample1	GATTACAGATTACAGA	3001	3	s	Toyvirusgenus	Toyvirus
+sample1	GGGTTTAAAACCCGGG	3001	3	s	Toyvirusgenus	Toyvirus
+sample1	CCCGGGTTTAAAACCC	3001	2	s	Toyvirusgenus	Toyvirus
+sample1	TGCATGCATGCATGCA	3001	2	s	Toyvirusgenus	Toyvirus
+sample1	AAACCCGGGTTTAAAA	3001	1	s	Toyvirusgenus	Toyvirus
+sample1	ACGTACGTACGTACGT	3001	1	s	Toyvirusgenus	Toyvirus
+sample2	CCCGGGTTTAAAACCC	1000	12	g	ToygenusA	
+sample2	CTAGCTAGCTAGCTAG	1000	12	g	ToygenusA	
+sample2	TGCATGCATGCATGCA	1000	12	g	ToygenusA	
+sample2	TTTAAAACCCGGGTTT	1000	12	g	ToygenusA	
+sample2	AAACCCGGGTTTAAAA	1000	8	g	ToygenusA	
+sample2	ACGTACGTACGTACGT	1000	8	g	ToygenusA	
+sample2	GATTACAGATTACAGA	1000	8	g	ToygenusA	
+sample2	GGGTTTAAAACCCGGG	1000	8	g	ToygenusA	
+sample2	CCCGGGTTTAAAACCC	1002	8	s	ToygenusA	ToyspeciesA2
+sample2	TGCATGCATGCATGCA	1002	8	s	ToygenusA	ToyspeciesA2
+sample2	AAACCCGGGTTTAAAA	1002	6	s	ToygenusA	ToyspeciesA2
+sample2	ACGTACGTACGTACGT	1002	6	s	ToygenusA	ToyspeciesA2
+sample2	CTAGCTAGCTAGCTAG	1002	4	s	ToygenusA	ToyspeciesA2
+sample2	TTTAAAACCCGGGTTT	1002	4	s	ToygenusA	ToyspeciesA2
+sample2	GATTACAGATTACAGA	1002	2	s	ToygenusA	ToyspeciesA2
+sample2	GGGTTTAAAACCCGGG	1002	2	s	ToygenusA	ToyspeciesA2
+sample2	AAACCCGGGTTTAAAA	2001	8	s	ToygenusB	ToyspeciesB
+sample2	ACGTACGTACGTACGT	2001	8	s	ToygenusB	ToyspeciesB
+sample2	CTAGCTAGCTAGCTAG	2001	6	s	ToygenusB	ToyspeciesB
+sample2	TTTAAAACCCGGGTTT	2001	6	s	ToygenusB	ToyspeciesB
+sample2	GATTACAGATTACAGA	2001	4	s	ToygenusB	ToyspeciesB
+sample2	GGGTTTAAAACCCGGG	2001	4	s	ToygenusB	ToyspeciesB
+sample2	CCCGGGTTTAAAACCC	2001	2	s	ToygenusB	ToyspeciesB
+sample2	TGCATGCATGCATGCA	2001	2	s	ToygenusB	ToyspeciesB
+sample2	CTAGCTAGCTAGCTAG	3001	8	s	Toyvirusgenus	Toyvirus
+sample2	TTTAAAACCCGGGTTT	3001	8	s	Toyvirusgenus	Toyvirus
+sample2	GATTACAGATTACAGA	3001	6	s	Toyvirusgenus	Toyvirus
+sample2	GGGTTTAAAACCCGGG	3001	6	s	Toyvirusgenus	Toyvirus
+sample2	CCCGGGTTTAAAACCC	3001	4	s	Toyvirusgenus	Toyvirus
+sample2	TGCATGCATGCATGCA	3001	4	s	Toyvirusgenus	Toyvirus
+sample2	AAACCCGGGTTTAAAA	3001	2	s	Toyvirusgenus	Toyvirus
+sample2	ACGTACGTACGTACGT	3001	2	s	Toyvirusgenus	Toyvirus
+sample3	CCCGGGTTTAAAACCC	1000	18	g	ToygenusA	
+sample3	CTAGCTAGCTAGCTAG	1000	18	g	ToygenusA	
+sample3	TGCATGCATGCATGCA	1000	18	g	ToygenusA	
+sample3	TTTAAAACCCGGGTTT	1000	18	g	ToygenusA	
+sample3	AAACCCGGGTTTAAAA	1000	12	g	ToygenusA	
+sample3	ACGTACGTACGTACGT	1000	12	g	ToygenusA	
+sample3	GATTACAGATTACAGA	1000	12	g	ToygenusA	
+sample3	GGGTTTAAAACCCGGG	1000	12	g	ToygenusA	
+sample3	CCCGGGTTTAAAACCC	1002	12	s	ToygenusA	ToyspeciesA2
+sample3	TGCATGCATGCATGCA	1002	12	s	ToygenusA	ToyspeciesA2
+sample3	AAACCCGGGTTTAAAA	1002	9	s	ToygenusA	ToyspeciesA2
+sample3	ACGTACGTACGTACGT	1002	9	s	ToygenusA	ToyspeciesA2
+sample3	CTAGCTAGCTAGCTAG	1002	6	s	ToygenusA	ToyspeciesA2
+sample3	TTTAAAACCCGGGTTT	1002	6	s	ToygenusA	ToyspeciesA2
+sample3	GATTACAGATTACAGA	1002	3	s	ToygenusA	ToyspeciesA2
+sample3	GGGTTTAAAACCCGGG	1002	3	s	ToygenusA	ToyspeciesA2
+sample3	AAACCCGGGTTTAAAA	2001	12	s	ToygenusB	ToyspeciesB
+sample3	ACGTACGTACGTACGT	2001	12	s	ToygenusB	ToyspeciesB
+sample3	CTAGCTAGCTAGCTAG	2001	9	s	ToygenusB	ToyspeciesB
+sample3	TTTAAAACCCGGGTTT	2001	9	s	ToygenusB	ToyspeciesB
+sample3	GATTACAGATTACAGA	2001	6	s	ToygenusB	ToyspeciesB
+sample3	GGGTTTAAAACCCGGG	2001	6	s	ToygenusB	ToyspeciesB
+sample3	CCCGGGTTTAAAACCC	2001	3	s	ToygenusB	ToyspeciesB
+sample3	TGCATGCATGCATGCA	2001	3	s	ToygenusB	ToyspeciesB
+sample3	CTAGCTAGCTAGCTAG	3001	12	s	Toyvirusgenus	Toyvirus
+sample3	TTTAAAACCCGGGTTT	3001	12	s	Toyvirusgenus	Toyvirus
+sample3	GATTACAGATTACAGA	3001	9	s	Toyvirusgenus	Toyvirus
+sample3	GGGTTTAAAACCCGGG	3001	9	s	Toyvirusgenus	Toyvirus
+sample3	CCCGGGTTTAAAACCC	3001	6	s	Toyvirusgenus	Toyvirus
+sample3	TGCATGCATGCATGCA	3001	6	s	Toyvirusgenus	Toyvirus
+sample3	AAACCCGGGTTTAAAA	3001	3	s	Toyvirusgenus	Toyvirus
+sample3	ACGTACGTACGTACGT	3001	3	s	Toyvirusgenus	Toyvirus

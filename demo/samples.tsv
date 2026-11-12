@@ -1,0 +1,4 @@
+sample_id	cellranger_outs
+sample1	demo/input/sample1/outs
+sample2	demo/input/sample2/outs
+sample3	demo/input/sample3/outs

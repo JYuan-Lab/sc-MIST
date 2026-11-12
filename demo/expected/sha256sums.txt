@@ -1,0 +1,3 @@
+38710c5cbeb577b06621090fa818f667194dce3b04ce615d4016b5f0fe18f6b6  demo/expected/taxon_umi_matrix.tsv
+3b2c8b81d28a2c6e1f648a192fd53184aa35b7380cba2608031de3679644de0a  demo/expected/cell_taxon_umi_long.tsv
+b7e2dd3fe3546e13670057ad463eeeb0861469f08e0ebd1427105b3a7c6893de  demo/expected/qc_summary.tsv

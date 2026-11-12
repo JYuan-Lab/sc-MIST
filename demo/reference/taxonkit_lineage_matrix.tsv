@@ -1,0 +1,9 @@
+taxid	kindom	phylum	genus	species	g_taxid	s_taxid
+1000	k__Bacteria	p__ToyphylumA	g__ToygenusA	NA	1000	NA
+1001	k__Bacteria	p__ToyphylumA	g__ToygenusA	s__ToyspeciesA	1000	1001
+1002	k__Bacteria	p__ToyphylumA	g__ToygenusA	s__ToyspeciesA2	1000	1002
+2000	k__Bacteria	p__ToyphylumB	g__ToygenusB	NA	2000	NA
+2001	k__Bacteria	p__ToyphylumB	g__ToygenusB	s__ToyspeciesB	2000	2001
+3000	k__Viruses	NA	g__Toyvirusgenus	NA	3000	NA
+3001	k__Viruses	NA	g__Toyvirusgenus	s__Toyvirus	3000	3001
+9606	k__Eukaryota	NA	NA	s__Homo_sapiens	NA	9606

@@ -1,0 +1,4 @@
+species	species_taxid	genus	genus_taxid	phylum	phylum_taxid	score
+s__ToyspeciesA	1001	g__ToygenusA	1000	p__ToyphylumA	100	6
+s__ToyspeciesA2	1002	g__ToygenusA	1000	p__ToyphylumA	100	6
+s__ToyspeciesB	2001	g__ToygenusB	2000	p__ToyphylumB	200	6
