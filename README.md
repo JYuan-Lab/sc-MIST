@@ -1323,10 +1323,6 @@ NCBI Virus records and host annotations change over time; the downloadable
 metadata, scoring rule, and snapshot dates are documented above and in
 [`docs/01_reference_build.md`](docs/01_reference_build.md).
 
-This repository contains the 11-step microbial signal pipeline and its demo.
-Downstream Seurat v4 analysis, cancer-type enrichment, and manuscript figures
-are not part of this release.
-
 ---
 
 ## Citation, acknowledgements, and license
