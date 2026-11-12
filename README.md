@@ -27,8 +27,6 @@ This repository provides a synthetic 3-sample demo dataset​ for a quick start.
 - [Filtering rules](#filtering-rules)
 - [Output files](#output-files)
 - [Running all samples at once](#running-all-samples-at-once)
-- [Troubleshooting](#troubleshooting)
-- [What is not included](#what-is-not-included)
 - [Citation, acknowledgements, and license](#citation-acknowledgements-and-license)
 
 ---
@@ -182,27 +180,20 @@ Rscript -e 'for (p in c("optparse","dplyr","tidyr","stringr","data.table","readr
 Ranger `bamtofastq` executable on `PATH`, or set `BAMTOFASTQ` in
 `config/config.sh` to its absolute path.
 
-`environment.yaml` uses version bounds so that it also solves on macOS arm64.
-Pin exact versions on Linux if you need a byte-for-byte reproduction.
-
 ---
 
 ## Input data
 
-### Required Cell Ranger output
+### FASTQ Processing
 
-For each sample, provide the standard Cell Ranger `outs/` directory. The
-pipeline needs:
+sc-MIST can be applied to both 10x and non-10x data. For 10x data, the analysis starts directly from the Cell Ranger outputs; for non-10x data, we recommend running the FASTQ files through zUMIs​ first, to demultiplex cell barcodes and UMIs and align reads to the reference genome (GENCODE v32), so that the output matches the read structure expected by this pipeline. In what follows, we illustrate the pipeline using 10x data as an example.
+
+For each sample, provide the standard Cell Ranger `outs/` directory. The pipeline needs:
 
 ```text
 /path/to/sample1/outs/possorted_genome_bam.bam
 /path/to/sample1/outs/filtered_feature_bc_matrix/barcodes.tsv.gz
 ```
-
-The BAM must retain the original 10x read structure. The pipeline keeps the
-first `BC_LEN + UMI_LEN` bases of R1 as **cell barcode + UMI**. The manuscript
-used Cell Ranger v7.2.0 with `refdata-gex-GRCh38-2020-A`; record the Cell Ranger
-version and reference used in your project.
 
 `barcodes.tsv.gz` is optional. It is used only when `CELLRANGER_FILTER=1`
 (default) to restrict the final cell-level table to Cell Ranger cell-called
@@ -228,10 +219,6 @@ sample1	/path/to/sample1/outs
 sample2	/path/to/sample2/outs
 sample3	/path/to/sample3/outs
 ```
-
-Sample IDs must be unique, must not contain whitespace, and must match the
-sample names used in the output folders. Relative paths are resolved against
-the repository root.
 
 > **At least 3 samples are required.** Step 07 estimates sample-level
 > correlations. Three samples is the mathematical minimum; more samples give a
@@ -310,25 +297,6 @@ demo/results/
 └── logs/
 ```
 
-Useful inspection commands:
-
-```bash
-find demo/results -maxdepth 3 -type f | sort | head -80
-gzip -cd demo/results/01_unmapped/sample1/sample1_R1.bcumi.fastq.gz | head -8
-head demo/results/02_kraken/sample1/sample1.kraken.report.std.txt
-head demo/results/03_microbial/sample1/sample1.microbiome.output.txt
-head demo/results/04_bwa/sample1/sample1_bwa_pass_reads.tsv
-cat demo/results/05_host_filter/sample1/sample1_host_filter_stats.tsv
-cat demo/results/06_denoise/sample1/sample1.barcode.kmer.hits.tsv
-cat demo/results/07_sample_denoise/sample_denoising.tsv
-cat demo/results/08_cellline/sample1/sample1.cell_line_quantile_hits_taxa.tsv
-cat demo/results/09_decontam/decontam.tsv
-cat demo/results/10_quantify/sample1/sample1.taxon_metrics.tsv
-cat demo/results/10_quantify/sample1/sample1.qc.tsv
-cat demo/results/11_summary/taxon_umi_matrix.tsv
-cat demo/results/11_summary/taxon_annotation.tsv
-cat demo/results/11_summary/virus_filter_summary.tsv
-```
 
 Observed demo values for `sample1` (project-level values use all three samples):
 
@@ -346,18 +314,7 @@ Observed demo values for `sample1` (project-level values use all three samples):
 | 10 | counts/filtered counts/abundance/QC | 4 retained taxa; 100 UMIs; 8 barcodes |
 | 11 | final matrices and annotations | 4 taxa × 3 samples |
 
-Exact counts may vary by a read or two across Kraken2/BWA versions. The
-retained taxid set and the non-empty three-sample matrix are the important
-checks. A copy of the expected final tables is in `demo/expected/`.
-
-After the toy references have been built once, re-run only the pipeline with:
-
-```bash
-bash scripts/run_pipeline.sh \
-  --config demo/config.demo.sh \
-  --start 1 --end 11
-```
-
+A copy of the expected final tables is in `demo/expected/`.
 More detail is in [`docs/04_demo.md`](docs/04_demo.md).
 
 ---
@@ -1212,7 +1169,7 @@ The two files most users need are:
 
 - `results/11_summary/taxon_umi_matrix.tsv` — taxon × sample UMI matrix.
 - `results/11_summary/cell_taxon_umi_long.tsv` — cell-level long table for
-  joining to a Seurat v4 object or another single-cell metadata table.
+  joining to a single-cell metadata table.
 
 See [`docs/03_outputs.md`](docs/03_outputs.md) for column-level descriptions.
 
@@ -1250,80 +1207,6 @@ The runner writes one log per sample and step under `results/logs/`.
 
 ---
 
-## Troubleshooting
-
-**`bamtofastq: command not found`**
-
-Install Cell Ranger and put its 10x `bamtofastq` executable on `PATH`, or set
-`BAMTOFASTQ` in `config/config.sh` to its absolute path. The demo's
-`demo/utils/bamtofastq_samtools.sh` is a portable fallback for synthetic data
-only; use the official 10x tool for real Cell Ranger BAMs.
-
-**Fewer than 3 samples**
-
-Step 07 needs at least 3 samples. The runner prints a warning but continues;
-do not use a 1–2 sample project for the strict filter.
-
-
-**No taxa survive step 10**
-
-Inspect, in order:
-
-```text
-results/10_quantify/<sample>/<sample>.taxon_metrics.tsv
-results/08_cellline/<sample>/<sample>.cell_line_quantile_hits.tsv
-results/07_sample_denoise/sample_denoising.tsv
-results/06_denoise/<sample>/<sample>.barcode.kmer.hits.tsv
-```
-
-Check read depth, `MIN_CORR`, the cell-line q90 table, taxid consistency
-between the BWA library and lineage matrix, the blacklists, and DECONTAM
-p-values.
-
-**A virus disappears in step 11**
-
-Inspect `results/11_summary/taxon_annotation.tsv`. The columns
-`ncbihost_human`, `humanvirusbase`, `HVIDB_human`, and `virus_score` show which
-evidence sources supported the taxon. A score below `VIRUS_MIN_SCORE` is
-dropped by design.
-
-**Kraken2 database errors**
-
-Confirm that `KRAKEN_DB` contains `hash.k2d`, `opts.k2d`, and `taxo.k2d`, and
-that the database was built with a compatible k-mer length (the released
-database used `k=35`).
-
-**Empty or unexpectedly small demo output**
-
-Run `bash demo/run_demo.sh` from a clean checkout and compare with
-`demo/expected/`. The demo intentionally uses very few reads; small numerical
-differences caused by Kraken2/BWA versions are expected.
-
-For more detail, see [`docs/05_troubleshooting.md`](docs/05_troubleshooting.md).
-
----
-
-## What is not included
-
-Large reference resources are intentionally not committed. Before running on
-real data, provide:
-
-1. a Kraken2 database (`KRAKEN_DB`);
-2. a taxon-specific BWA library (`BWA_LIBRARY`);
-3. a combined, BWA-indexed HLA + human rRNA FASTA (`HOST_RESIDUAL_FASTA`);
-4. a taxonkit-style lineage matrix (`TAXON_LINEAGE`);
-5. the NCBI Virus host metadata table (`VIRUS_NCBI_HOST`);
-6. Cell Ranger `outs/` directories for at least 3 samples.
-
-The cell-line q90 table is bundled, so it does not need to be rebuilt unless
-you want to reproduce it from your own cell-line data.
-
-The exact viral accession list used in the manuscript is not committed because
-NCBI Virus records and host annotations change over time; the downloadable
-metadata, scoring rule, and snapshot dates are documented above and in
-[`docs/01_reference_build.md`](docs/01_reference_build.md).
-
----
 
 ## Citation, acknowledgements, and license
 
